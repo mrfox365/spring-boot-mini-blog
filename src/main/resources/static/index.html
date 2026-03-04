@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Головна - IT Blog</title>
+    <style>
+        /* БАЗОВІ СТИЛІ */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; }
+        * { box-sizing: border-box; }
+
+        /* ШАПКА ТА НАВІГАЦІЯ */
+        header { background-color: #ffffff; padding: 0.5rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #1877f2; text-decoration: none; }
+
+        /* ПРОФІЛЬ ТА МЕНЮ */
+        .profile-container { position: relative; }
+        .avatar { width: 40px; height: 40px; background-color: #1877f2; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; user-select: none; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 200px; overflow: hidden; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-item { padding: 12px 16px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #eee; }
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background-color: #f0f2f5; }
+        .logout-text { color: #dc3545; }
+
+        /* ГОЛОВНИЙ КОНТЕЙНЕР */
+        .container { max-width: 680px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* СТВОРЕННЯ ПОСТА */
+        .create-post-box { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; }
+        textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; min-height: 80px; font-family: inherit; margin-bottom: 10px; }
+        .btn { background-color: #1877f2; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background-color: #166fe5; }
+        .btn-secondary { background-color: #e4e6eb; color: #050505; }
+        .btn-secondary:hover { background-color: #d8dadf; }
+
+        /* КАРТКА ПОСТА */
+        .post-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; }
+        .post-header { display: flex; align-items: center; margin-bottom: 1rem; }
+        .post-author { font-weight: bold; cursor: pointer; color: #050505; text-decoration: none; margin-left: 10px; }
+        .post-author:hover { text-decoration: underline; }
+        .post-date { font-size: 0.8em; color: #65676b; margin-left: auto; }
+        .post-content { margin-bottom: 1.5rem; line-height: 1.5; white-space: pre-wrap; }
+
+        /* КОМЕНТАРІ */
+        .comments-section { border-top: 1px solid #e4e6eb; padding-top: 1rem; }
+        .comment { display: flex; margin-bottom: 10px; background: #f0f2f5; padding: 10px; border-radius: 12px; }
+        .comment-body { margin-left: 10px; flex-grow: 1; }
+        .comment-header { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 4px; }
+        .comment-input-box { display: flex; gap: 10px; margin-top: 10px; }
+        .comment-input-box input { flex-grow: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+
+        /* МОДАЛЬНІ ВІКНА */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #666; background: none; border: none; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+    <script>
+        // Захист сторінки
+        if (!localStorage.getItem('isAuthenticated')) {
+            window.location.replace('/auth.html');
+        }
+        const currentUser = localStorage.getItem('currentUser');
+    </script>
+</head>
+<body>
+
+<header>
+    <a href="#" class="logo">IT Blog</a>
+    <div class="profile-container">
+        <div class="avatar" id="headerAvatar" onclick="toggleDropdown()">?</div>
+        <div class="dropdown-menu" id="profileMenu">
+            <div class="dropdown-item" onclick="openSettingsModal()">Налаштування профілю</div>
+            <div class="dropdown-item logout-text" onclick="logout()">Вийти з акаунту</div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="create-post-box">
+        <h3 style="margin-top: 0;">Що у вас нового?</h3>
+        <textarea id="newPostContent" placeholder="Напишіть свій запис тут..."></textarea>
+        <button class="btn" onclick="submitPost()">Опублікувати</button>
+    </div>
+
+    <div id="feedContainer">
+        <p style="text-align: center; color: #666;">Завантаження записів...</p>
+    </div>
+</div>
+
+<div class="modal-overlay" id="viewProfileModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('viewProfileModal')">&times;</button>
+        <h2 id="viewUsername" style="text-align: center; margin-top: 0;">Нікнейм</h2>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span style="color: #666;" id="viewEmail">email@example.com</span>
+        </div>
+        <div class="form-group">
+            <label>Про себе:</label>
+            <p id="viewBio" style="background: #f0f2f5; padding: 10px; border-radius: 8px; min-height: 50px;">Інформація відсутня</p>
+        </div>
+        <div class="form-group">
+            <label>Дата народження:</label>
+            <p id="viewBirthDate">Не вказано</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
+        <h2 style="margin-top: 0;">Налаштування профілю</h2>
+        <div class="form-group">
+            <label>Нікнейм:</label>
+            <input type="text" id="editUsername">
+        </div>
+        <div class="form-group">
+            <label>Новий пароль (залиште пустим, якщо не змінюєте):</label>
+            <input type="password" id="editPassword" placeholder="Введіть новий пароль">
+        </div>
+        <div class="form-group">
+            <label>Про себе:</label>
+            <textarea id="editBio" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Дата народження:</label>
+            <input type="date" id="editBirthDate">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn" onclick="saveProfileSettings()" style="flex-grow: 1;">Зберегти зміни</button>
+            <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Скасувати</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:8080/api';
+
+    // Ініціалізація при завантаженні
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
+        loadPosts();
+    });
+
+    // Форматування дати
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString('uk-UA', options);
+    }
+
+    // ================= ПОСТИ ТА КОМЕНТАРІ =================
+
+    async function loadPosts() {
+        try {
+            const response = await fetch(`${API_BASE}/blog/posts`);
+            const posts = await response.json();
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">Поки що немає записів. Будьте першим!</p>';
+                return;
+            }
+
+            for (const post of posts) {
+                const postEl = document.createElement('div');
+                postEl.className = 'post-card';
+
+                // Шаблон картки поста
+                postEl.innerHTML = `
+                        <div class="post-header">
+                            <div class="avatar" style="width: 30px; height: 30px; font-size: 14px;" onclick="viewProfile('${post.authorUsername}')">${post.authorUsername.charAt(0).toUpperCase()}</div>
+                            <span class="post-author" onclick="viewProfile('${post.authorUsername}')">${post.authorUsername}</span>
+                            <span class="post-date">${formatDate(post.createdAt)}</span>
+                        </div>
+                        <div class="post-content">${post.content}</div>
+
+                        <div class="comments-section" id="comments-${post.id}">
+                            <div id="comment-list-${post.id}"></div>
+                            <div class="comment-input-box">
+                                <input type="text" id="comment-input-${post.id}" placeholder="Написати коментар...">
+                                <button class="btn" onclick="submitComment(${post.id})">Надіслати</button>
+                            </div>
+                        </div>
+                    `;
+                container.appendChild(postEl);
+
+                // Відразу завантажуємо коментарі до цього поста
+                loadComments(post.id);
+            }
+        } catch (error) {
+            console.error('Помилка завантаження постів:', error);
+        }
+    }
+
+    async function submitPost() {
+        const content = document.getElementById('newPostContent').value;
+        if (!content.trim()) return alert('Пост не може бути порожнім!');
+
+        const response = await fetch(`${API_BASE}/blog/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: content, authorUsername: currentUser })
+        });
+
+        if (response.ok) {
+            document.getElementById('newPostContent').value = '';
+            loadPosts(); // Оновлюємо стрічку
+        } else {
+            alert('Помилка створення поста');
+        }
+    }
+
+    async function loadComments(postId) {
+        const response = await fetch(`${API_BASE}/blog/comments/${postId}`);
+        const comments = await response.json();
+        const listElement = document.getElementById(`comment-list-${postId}`);
+        listElement.innerHTML = '';
+
+        comments.forEach(comment => {
+            const cEl = document.createElement('div');
+            cEl.className = 'comment';
+            cEl.innerHTML = `
+                    <div class="avatar" style="width: 25px; height: 25px; font-size: 12px; cursor: pointer;" onclick="viewProfile('${comment.authorUsername}')">${comment.authorUsername.charAt(0).toUpperCase()}</div>
+                    <div class="comment-body">
+                        <div class="comment-header">
+                            <strong style="cursor: pointer;" onclick="viewProfile('${comment.authorUsername}')">${comment.authorUsername}</strong>
+                            <span style="color: #666;">${formatDate(comment.createdAt)}</span>
+                        </div>
+                        <div>${comment.content}</div>
+                    </div>
+                `;
+            listElement.appendChild(cEl);
+        });
+    }
+
+    async function submitComment(postId) {
+        const input = document.getElementById(`comment-input-${postId}`);
+        const content = input.value;
+        if (!content.trim()) return;
+
+        const response = await fetch(`${API_BASE}/blog/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: postId, content: content, authorUsername: currentUser })
+        });
+
+        if (response.ok) {
+            input.value = '';
+            loadComments(postId); // Оновлюємо тільки коментарі цього поста
+        }
+    }
+
+    // ================= ПРОФІЛЬ ТА МЕНЮ =================
+
+    function toggleDropdown() {
+        document.getElementById('profileMenu').classList.toggle('show');
+    }
+
+    // Закривати меню при кліку поза ним
+    window.onclick = function(event) {
+        if (!event.target.matches('.avatar')) {
+            const dropdowns = document.getElementsByClassName("dropdown-menu");
+            for (let i = 0; i < dropdowns.length; i++) {
+                if (dropdowns[i].classList.contains('show')) {
+                    dropdowns[i].classList.remove('show');
+                }
+            }
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('currentUser');
+        window.location.href = '/auth.html';
+    }
+
+    // ================= МОДАЛЬНІ ВІКНА =================
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    // Перегляд чужого (або свого) профілю при кліку на нікнейм
+    async function viewProfile(username) {
+        try {
+            const response = await fetch(`${API_BASE}/profile/${username}`);
+            if (response.ok) {
+                const profile = await response.json();
+                document.getElementById('viewUsername').innerText = profile.username;
+                document.getElementById('viewEmail').innerText = profile.email;
+                document.getElementById('viewBio').innerText = profile.bio || 'Інформація відсутня';
+                document.getElementById('viewBirthDate').innerText = profile.birthDate || 'Не вказано';
+
+                document.getElementById('viewProfileModal').classList.add('show');
+            }
+        } catch (error) {
+            alert('Помилка завантаження профілю');
+        }
+    }
+
+    // Відкриття налаштувань власного профілю
+    async function openSettingsModal() {
+        try {
+            const response = await fetch(`${API_BASE}/profile/${currentUser}`);
+            if (response.ok) {
+                const profile = await response.json();
+                document.getElementById('editUsername').value = profile.username;
+                document.getElementById('editBio').value = profile.bio || '';
+                document.getElementById('editBirthDate').value = profile.birthDate || '';
+                document.getElementById('editPassword').value = ''; // Завжди пусте з міркувань безпеки
+
+                document.getElementById('settingsModal').classList.add('show');
+            }
+        } catch (error) {
+            alert('Помилка завантаження налаштувань');
+        }
+    }
+
+    // Збереження оновлень профілю
+    async function saveProfileSettings() {
+        const newUsername = document.getElementById('editUsername').value;
+        const newPassword = document.getElementById('editPassword').value;
+        const bio = document.getElementById('editBio').value;
+        const birthDate = document.getElementById('editBirthDate').value;
+
+        if (!newUsername.trim()) return alert('Нікнейм не може бути порожнім!');
+
+        const payload = {
+            currentUsername: currentUser,
+            newUsername: newUsername,
+            newPassword: newPassword,
+            bio: bio,
+            birthDate: birthDate || null
+        };
+
+        const response = await fetch(`${API_BASE}/profile/update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+
+        if (response.ok) {
+            alert('Профіль успішно оновлено!');
+            // Якщо нікнейм змінився, оновлюємо його в браузері
+            if (newUsername !== currentUser) {
+                localStorage.setItem('currentUser', newUsername);
+                // Перезавантажуємо сторінку, щоб оновити всі підписи
+                window.location.reload();
+            } else {
+                closeModal('settingsModal');
+            }
+        } else {
+            alert('Помилка: ' + text);
+        }
+    }
+</script>
+</body>
+</html>

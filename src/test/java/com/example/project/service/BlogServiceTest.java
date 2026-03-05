@@ -1,5 +1,14 @@
 package com.example.project.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.example.project.dto.BlogRequests.CreateCommentRequest;
 import com.example.project.dto.BlogRequests.CreatePostRequest;
 import com.example.project.dto.BlogResponses.CommentResponse;
@@ -10,6 +19,9 @@ import com.example.project.entity.User;
 import com.example.project.repository.CommentRepository;
 import com.example.project.repository.PostRepository;
 import com.example.project.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,14 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
+/**
+ * Unit tests for BlogService.
+ */
 @ExtendWith(MockitoExtension.class)
 class BlogServiceTest {
 
@@ -40,41 +47,35 @@ class BlogServiceTest {
   @InjectMocks
   private BlogService blogService;
 
-  // Дані для тестів
   private User testUser;
   private Post testPost;
   private Comment testComment;
 
   @BeforeEach
   void setUp() {
-    // Ініціалізація тестового користувача
     testUser = new User();
     testUser.setId(1L);
     testUser.setUsername("testAuthor");
 
-    // Ініціалізація тестового поста
     testPost = new Post();
     testPost.setId(100L);
-    testPost.setContent("Текст тестового поста");
+    testPost.setContent("Test post content");
     testPost.setAuthor(testUser);
     testPost.setCreatedAt(LocalDateTime.now());
 
-    // Ініціалізація тестового коментаря
     testComment = new Comment();
     testComment.setId(50L);
-    testComment.setContent("Тестовий коментар");
+    testComment.setContent("Test comment");
     testComment.setAuthor(testUser);
     testComment.setPost(testPost);
     testComment.setCreatedAt(LocalDateTime.now());
   }
 
-  // ================= ТЕСТИ ДЛЯ createPost =================
-
   @Test
   void createPost_SuccessfulCreation() {
     CreatePostRequest request = new CreatePostRequest();
     request.setAuthorUsername("testAuthor");
-    request.setContent("Привіт, світ!");
+    request.setContent("Hello World!");
 
     when(userRepository.findByUsername("testAuthor")).thenReturn(Optional.of(testUser));
 
@@ -94,11 +95,10 @@ class BlogServiceTest {
       blogService.createPost(request);
     });
 
-    assertEquals("Користувача не знайдено", exception.getMessage());
+    // Оновлено текст на англійський
+    assertEquals("User not found", exception.getMessage());
     verify(postRepository, never()).save(any(Post.class));
   }
-
-  // ================= ТЕСТИ ДЛЯ getAllPosts =================
 
   @Test
   void getAllPosts_ReturnsMappedDtoList() {
@@ -109,26 +109,22 @@ class BlogServiceTest {
     assertNotNull(responses);
     assertEquals(1, responses.size());
     assertEquals(100L, responses.get(0).getId());
-    assertEquals("Текст тестового поста", responses.get(0).getContent());
+    assertEquals("Test post content", responses.get(0).getContent());
     assertEquals("testAuthor", responses.get(0).getAuthorUsername());
   }
-
-  // ================= ТЕСТИ ДЛЯ addComment =================
 
   @Test
   void addComment_SuccessfulAddition() {
     CreateCommentRequest request = new CreateCommentRequest();
     request.setAuthorUsername("testAuthor");
     request.setPostId(100L);
-    request.setContent("Мій коментар");
+    request.setContent("My comment");
 
-    // Мокаємо успішний пошук юзера і поста
     when(userRepository.findByUsername("testAuthor")).thenReturn(Optional.of(testUser));
     when(postRepository.findById(100L)).thenReturn(Optional.of(testPost));
 
     blogService.addComment(request);
 
-    // Перевіряємо, чи викликався метод збереження коментаря
     verify(commentRepository, times(1)).save(any(Comment.class));
   }
 
@@ -136,7 +132,7 @@ class BlogServiceTest {
   void addComment_PostNotFound_ThrowsException() {
     CreateCommentRequest request = new CreateCommentRequest();
     request.setAuthorUsername("testAuthor");
-    request.setPostId(999L); // Неіснуючий пост
+    request.setPostId(999L);
 
     when(userRepository.findByUsername("testAuthor")).thenReturn(Optional.of(testUser));
     when(postRepository.findById(999L)).thenReturn(Optional.empty());
@@ -145,11 +141,10 @@ class BlogServiceTest {
       blogService.addComment(request);
     });
 
-    assertEquals("Пост не знайдено", exception.getMessage());
+    // Оновлено текст на англійський
+    assertEquals("Post not found", exception.getMessage());
     verify(commentRepository, never()).save(any(Comment.class));
   }
-
-  // ================= ТЕСТИ ДЛЯ getCommentsForPost =================
 
   @Test
   void getCommentsForPost_ReturnsMappedDtoList() {
@@ -160,7 +155,7 @@ class BlogServiceTest {
     assertNotNull(responses);
     assertEquals(1, responses.size());
     assertEquals(50L, responses.get(0).getId());
-    assertEquals("Тестовий коментар", responses.get(0).getContent());
+    assertEquals("Test comment", responses.get(0).getContent());
     assertEquals("testAuthor", responses.get(0).getAuthorUsername());
   }
 }

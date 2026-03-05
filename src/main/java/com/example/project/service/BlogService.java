@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for managing blog posts and comments.
@@ -94,5 +95,44 @@ public class BlogService {
       dto.setCreatedAt(comment.getCreatedAt());
       return dto;
     }).collect(Collectors.toList());
+  }
+
+  /**
+   * Deletes a post and all its associated comments.
+   *
+   * @param postId   the ID of the post
+   * @param username the username of the user requesting deletion
+   */
+  @Transactional
+  public void deletePost(Long postId, String username) {
+    Post post = postRepository.findById(postId)
+        .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+    if (!post.getAuthor().getUsername().equals(username)) {
+      throw new IllegalArgumentException("You can only delete your own posts");
+    }
+
+    // First delete all comments related to this post to avoid foreign key constraints
+    commentRepository.deleteAllByPostId(postId);
+    // Then delete the post itself
+    postRepository.delete(post);
+  }
+
+  /**
+   * Deletes a specific comment.
+   *
+   * @param commentId the ID of the comment
+   * @param username  the username of the user requesting deletion
+   */
+  @Transactional
+  public void deleteComment(Long commentId, String username) {
+    Comment comment = commentRepository.findById(commentId)
+        .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+
+    if (!comment.getAuthor().getUsername().equals(username)) {
+      throw new IllegalArgumentException("You can only delete your own comments");
+    }
+
+    commentRepository.delete(comment);
   }
 }

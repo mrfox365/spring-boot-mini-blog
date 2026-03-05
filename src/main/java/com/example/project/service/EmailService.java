@@ -17,7 +17,7 @@ public class EmailService {
   /**
    * Sends a 6-digit verification code to the specified email address.
    *
-   * @param to the recipient's email address
+   * @param to   the recipient's email address
    * @param code the verification code to send
    */
   public void sendVerificationCode(String to, String code) {
@@ -32,7 +32,7 @@ public class EmailService {
   /**
    * Sends a password reset link containing a security token.
    *
-   * @param to the recipient's email address
+   * @param to    the recipient's email address
    * @param token the security token for resetting the password
    */
   public void sendPasswordResetLink(String to, String token) {

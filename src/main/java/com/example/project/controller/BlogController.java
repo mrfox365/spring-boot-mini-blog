@@ -8,11 +8,13 @@ import com.example.project.service.BlogService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -68,5 +70,41 @@ public class BlogController {
   @GetMapping("/comments/{postId}")
   public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long postId) {
     return ResponseEntity.ok(blogService.getCommentsForPost(postId));
+  }
+
+  /**
+   * Deletes a specific post.
+   *
+   * @param postId   the ID of the post to delete
+   * @param username the user requesting deletion
+   * @return a success or error response entity
+   */
+  @DeleteMapping("/posts/{postId}")
+  public ResponseEntity<String> deletePost(
+      @PathVariable Long postId, @RequestParam String username) {
+    try {
+      blogService.deletePost(postId, username);
+      return ResponseEntity.ok("Post deleted successfully");
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Deletes a specific comment.
+   *
+   * @param commentId the ID of the comment to delete
+   * @param username  the user requesting deletion
+   * @return a success or error response entity
+   */
+  @DeleteMapping("/comments/{commentId}")
+  public ResponseEntity<String> deleteComment(
+      @PathVariable Long commentId, @RequestParam String username) {
+    try {
+      blogService.deleteComment(commentId, username);
+      return ResponseEntity.ok("Comment deleted successfully");
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 }

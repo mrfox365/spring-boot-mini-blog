@@ -66,9 +66,9 @@ public class AuthService {
    * STEP 2: Completes the registration by verifying the code and saving the user.
    *
    * @param username the user's chosen username
-   * @param email the user's email address
+   * @param email    the user's email address
    * @param password the user's raw password
-   * @param code the verification code sent to the email
+   * @param code     the verification code sent to the email
    */
   @Transactional
   public void completeRegistration(String username, String email, String password, String code) {
@@ -130,7 +130,7 @@ public class AuthService {
   /**
    * STEP 4: Sets a new password using the provided token.
    *
-   * @param token the password reset token
+   * @param token       the password reset token
    * @param newPassword the new raw password
    */
   @Transactional
@@ -161,7 +161,7 @@ public class AuthService {
   /**
    * STEP 5: Authenticates a user by username OR email.
    *
-   * @param login the user's username or email
+   * @param login       the user's username or email
    * @param rawPassword the user's raw password
    * @return true if authentication is successful, false otherwise
    */

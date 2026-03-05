@@ -358,8 +358,16 @@
 <script>
     const API_BASE = 'http://localhost:8080/api';
 
+    // Захист сторінки
+    if (!localStorage.getItem('isAuthenticated')) {
+        window.location.replace('/auth.html');
+    }
+
     // Ініціалізація при завантаженні
     document.addEventListener('DOMContentLoaded', () => {
+        // Якщо користувач не авторизований, перериваємо логіку і чекаємо на редирект
+        if (!currentUser) return;
+
         document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
         loadPosts();
     });
@@ -388,12 +396,18 @@
                 const postEl = document.createElement('div');
                 postEl.className = 'post-card';
 
+                // Малюємо кнопку видалення поста ТІЛЬКИ для автора
+                const deletePostBtn = (post.authorUsername === currentUser)
+                    ? `<button title="Видалити пост" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:1.2em; margin-left:10px;" onclick="deletePost(${post.id})">✖</button>`
+                    : '';
+
                 // Шаблон картки поста
                 postEl.innerHTML = `
                         <div class="post-header">
                             <div class="avatar" style="width: 30px; height: 30px; font-size: 14px;" onclick="viewProfile('${post.authorUsername}')">${post.authorUsername.charAt(0).toUpperCase()}</div>
                             <span class="post-author" onclick="viewProfile('${post.authorUsername}')">${post.authorUsername}</span>
                             <span class="post-date">${formatDate(post.createdAt)}</span>
+                            ${deletePostBtn}
                         </div>
                         <div class="post-content">${post.content}</div>
 
@@ -427,9 +441,27 @@
 
         if (response.ok) {
             document.getElementById('newPostContent').value = '';
-            loadPosts(); // Оновлюємо стрічку
+            loadPosts();
         } else {
             alert('Помилка створення поста');
+        }
+    }
+
+    async function deletePost(postId) {
+        if (!confirm('Ви впевнені, що хочете назавжди видалити цей пост та всі його коментарі?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/blog/posts/${postId}?username=${currentUser}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                loadPosts(); // Оновлюємо стрічку після видалення
+            } else {
+                const text = await response.text();
+                alert('Помилка: ' + text);
+            }
+        } catch (error) {
+            alert('Помилка з\'єднання');
         }
     }
 
@@ -442,12 +474,21 @@
         comments.forEach(comment => {
             const cEl = document.createElement('div');
             cEl.className = 'comment';
+
+            // Малюємо кнопку видалення коментаря ТІЛЬКИ для автора
+            const deleteCommentBtn = (comment.authorUsername === currentUser)
+                ? `<button title="Видалити коментар" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:1em; margin-left:10px;" onclick="deleteComment(${comment.id}, ${postId})">✖</button>`
+                : '';
+
             cEl.innerHTML = `
                     <div class="avatar" style="width: 25px; height: 25px; font-size: 12px; cursor: pointer;" onclick="viewProfile('${comment.authorUsername}')">${comment.authorUsername.charAt(0).toUpperCase()}</div>
                     <div class="comment-body">
                         <div class="comment-header">
                             <strong style="cursor: pointer;" onclick="viewProfile('${comment.authorUsername}')">${comment.authorUsername}</strong>
-                            <span style="color: #666;">${formatDate(comment.createdAt)}</span>
+                            <div>
+                                <span style="color: #666;">${formatDate(comment.createdAt)}</span>
+                                ${deleteCommentBtn}
+                            </div>
                         </div>
                         <div>${comment.content}</div>
                     </div>
@@ -469,7 +510,25 @@
 
         if (response.ok) {
             input.value = '';
-            loadComments(postId); // Оновлюємо тільки коментарі цього поста
+            loadComments(postId);
+        }
+    }
+
+    async function deleteComment(commentId, postId) {
+        if (!confirm('Ви впевнені, що хочете видалити цей коментар?')) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/blog/comments/${commentId}?username=${currentUser}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                loadComments(postId); // Оновлюємо список коментарів саме для цього поста
+            } else {
+                const text = await response.text();
+                alert('Помилка: ' + text);
+            }
+        } catch (error) {
+            alert('Помилка з\'єднання');
         }
     }
 
@@ -479,7 +538,6 @@
         document.getElementById('profileMenu').classList.toggle('show');
     }
 
-    // Закривати меню при кліку поза ним
     window.onclick = function (event) {
         if (!event.target.matches('.avatar')) {
             const dropdowns = document.getElementsByClassName("dropdown-menu");
@@ -503,7 +561,6 @@
         document.getElementById(modalId).classList.remove('show');
     }
 
-    // Перегляд чужого (або свого) профілю при кліку на нікнейм
     async function viewProfile(username) {
         try {
             const response = await fetch(`${API_BASE}/profile/${username}`);
@@ -521,7 +578,6 @@
         }
     }
 
-    // Відкриття налаштувань власного профілю
     async function openSettingsModal() {
         try {
             const response = await fetch(`${API_BASE}/profile/${currentUser}`);
@@ -530,7 +586,7 @@
                 document.getElementById('editUsername').value = profile.username;
                 document.getElementById('editBio').value = profile.bio || '';
                 document.getElementById('editBirthDate').value = profile.birthDate || '';
-                document.getElementById('editPassword').value = ''; // Завжди пусте з міркувань безпеки
+                document.getElementById('editPassword').value = '';
 
                 document.getElementById('settingsModal').classList.add('show');
             }
@@ -539,7 +595,6 @@
         }
     }
 
-    // Збереження оновлень профілю
     async function saveProfileSettings() {
         const newUsername = document.getElementById('editUsername').value;
         const newPassword = document.getElementById('editPassword').value;
@@ -566,10 +621,8 @@
 
         if (response.ok) {
             alert('Профіль успішно оновлено!');
-            // Якщо нікнейм змінився, оновлюємо його в браузері
             if (newUsername !== currentUser) {
                 localStorage.setItem('currentUser', newUsername);
-                // Перезавантажуємо сторінку, щоб оновити всі підписи
                 window.location.reload();
             } else {
                 closeModal('settingsModal');

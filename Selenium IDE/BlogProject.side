@@ -1,0 +1,354 @@
+{
+  "id": "5e35977b-298a-4779-9722-aa84a4853a17",
+  "version": "2.0",
+  "name": "BlogProject",
+  "url": "http://localhost:8080",
+  "tests": [{
+    "id": "0f256329-1a70-4d52-98d6-8ac2ae76776b",
+    "name": "Basic test",
+    "commands": [{
+      "id": "9ed2c76c-0dff-41e2-8fac-03ffdfc8751c",
+      "comment": "",
+      "command": "open",
+      "target": "/auth.html",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "734384cc-f2a3-460d-8bd6-7aeb283976c9",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "881x759",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0edb46f4-1fa9-4ad6-8c34-88f626f2d67e",
+      "comment": "",
+      "command": "click",
+      "target": "css=.container",
+      "targets": [
+        ["css=.container", "css:finder"],
+        ["xpath=//div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "74028695-dfd9-4830-b137-7843c8df3608",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "id=loginUsername",
+      "targets": [
+        ["id=loginUsername", "id"],
+        ["css=#loginUsername", "css:finder"],
+        ["xpath=//input[@id='loginUsername']", "xpath:attributes"],
+        ["xpath=//div[@id='loginForm']/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "eb2ae30c-eb51-48de-a93b-7899da9b4475",
+      "comment": "",
+      "command": "type",
+      "target": "id=loginUsername",
+      "targets": [
+        ["id=loginUsername", "id"],
+        ["css=#loginUsername", "css:finder"],
+        ["xpath=//input[@id='loginUsername']", "xpath:attributes"],
+        ["xpath=//div[@id='loginForm']/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "Fox"
+    }, {
+      "id": "57b7a9a5-d362-4350-95da-25640e7de3da",
+      "comment": "",
+      "command": "click",
+      "target": "css=body",
+      "targets": [
+        ["css=body", "css:finder"],
+        ["xpath=//body", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "2b281d0f-7d7f-45f8-b408-53feefcbe4eb",
+      "comment": "",
+      "command": "sendKeys",
+      "target": "id=loginPassword",
+      "targets": [
+        ["id=loginPassword", "id"],
+        ["css=#loginPassword", "css:finder"],
+        ["xpath=//input[@id='loginPassword']", "xpath:attributes"],
+        ["xpath=//div[@id='loginForm']/input[2]", "xpath:idRelative"],
+        ["xpath=//input[2]", "xpath:position"]
+      ],
+      "value": "${KEY_ENTER}"
+    }, {
+      "id": "92b684a5-6705-446c-989e-09538b47aa3d",
+      "comment": "",
+      "command": "type",
+      "target": "id=loginPassword",
+      "targets": [
+        ["id=loginPassword", "id"],
+        ["css=#loginPassword", "css:finder"],
+        ["xpath=//input[@id='loginPassword']", "xpath:attributes"],
+        ["xpath=//div[@id='loginForm']/input[2]", "xpath:idRelative"],
+        ["xpath=//input[2]", "xpath:position"]
+      ],
+      "value": "09125689"
+    }, {
+      "id": "e7d20ad3-6cb8-4ec7-946d-b76d2ea0215e",
+      "comment": "",
+      "command": "click",
+      "target": "css=#loginForm > button",
+      "targets": [
+        ["css=#loginForm > button", "css:finder"],
+        ["xpath=//button[@onclick='login()']", "xpath:attributes"],
+        ["xpath=//div[@id='loginForm']/button", "xpath:idRelative"],
+        ["xpath=//body/div/div/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Увійти')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "50540e02-7d47-4515-9273-30d7bc3d9338",
+      "comment": "",
+      "command": "click",
+      "target": "id=newPostContent",
+      "targets": [
+        ["id=newPostContent", "id"],
+        ["css=#newPostContent", "css:finder"],
+        ["xpath=//textarea[@id='newPostContent']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "230f8e18-7a2e-457a-8a14-d2a173001e2f",
+      "comment": "",
+      "command": "type",
+      "target": "id=newPostContent",
+      "targets": [
+        ["id=newPostContent", "id"],
+        ["css=#newPostContent", "css:finder"],
+        ["xpath=//textarea[@id='newPostContent']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": "Пустий комент"
+    }, {
+      "id": "6c11fc2c-b7aa-4df3-9068-e58cf5f4e8d6",
+      "comment": "",
+      "command": "click",
+      "target": "css=.btn:nth-child(3)",
+      "targets": [
+        ["css=.btn:nth-child(3)", "css:finder"],
+        ["xpath=//button[@onclick='submitPost()']", "xpath:attributes"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Опублікувати')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "b874b647-51ae-42d3-9fca-5f25e4d80290",
+      "comment": "",
+      "command": "click",
+      "target": "id=newPostContent",
+      "targets": [
+        ["id=newPostContent", "id"],
+        ["css=#newPostContent", "css:finder"],
+        ["xpath=//textarea[@id='newPostContent']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "180e882b-9757-4128-a94c-464c67790f7d",
+      "comment": "",
+      "command": "type",
+      "target": "id=newPostContent",
+      "targets": [
+        ["id=newPostContent", "id"],
+        ["css=#newPostContent", "css:finder"],
+        ["xpath=//textarea[@id='newPostContent']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": "Не пустий комент"
+    }, {
+      "id": "5261f526-7d6f-4113-afb0-dd193adf669b",
+      "comment": "",
+      "command": "click",
+      "target": "css=.btn:nth-child(3)",
+      "targets": [
+        ["css=.btn:nth-child(3)", "css:finder"],
+        ["xpath=//button[@onclick='submitPost()']", "xpath:attributes"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Опублікувати')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "5b3a17ed-e98f-49f6-a853-58c2c244e227",
+      "comment": "Вводимо коментар у перший пост",
+      "command": "click",
+      "target": "css=.post-card:nth-child(1) .comment-input-box input",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "7f5a8eb6-b5bb-4c91-9167-f7cb028efd16",
+      "comment": "Пишемо текст коментаря в перший пост",
+      "command": "type",
+      "target": "css=.post-card:nth-child(1) .comment-input-box input",
+      "targets": [],
+      "value": "Комент"
+    }, {
+      "id": "6892c268-2637-4fd2-92d3-8160221c9844",
+      "comment": "Надсилаємо коментар у перший пост",
+      "command": "click",
+      "target": "css=.post-card:nth-child(1) .comment-input-box button",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "2e484794-3da3-469e-85d7-673c662cd4cf",
+      "comment": "Клікаємо інпут коментаря в другому пості",
+      "command": "click",
+      "target": "css=.post-card:nth-child(2) .comment-input-box input",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "3d6370e0-1ce4-4cd0-a2f0-e2902fe859f5",
+      "comment": "Пишемо коментар в другий пост",
+      "command": "type",
+      "target": "css=.post-card:nth-child(2) .comment-input-box input",
+      "targets": [],
+      "value": "На видалення"
+    }, {
+      "id": "0cca9217-7265-4f67-925a-f921d260001a",
+      "comment": "Надсилаємо коментар у другий пост",
+      "command": "click",
+      "target": "css=.post-card:nth-child(2) .comment-input-box button",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "61f7113e-c3b3-4170-9619-5a1ff4974556",
+      "comment": "",
+      "command": "chooseOkOnNextConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0babb7b4-9293-41de-94fa-eba5ea4fc99b",
+      "comment": "Видаляємо коментар у другому пості",
+      "command": "click",
+      "target": "css=.post-card:nth-child(2) .comment button",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "4101d4a6-6204-4ac3-ad69-67a7a7450371",
+      "comment": "",
+      "command": "assertConfirmation",
+      "target": "Ви впевнені, що хочете видалити цей коментар?",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "6a8d6c5d-945d-4628-ac7a-998bb2d5d0c9",
+      "comment": "",
+      "command": "webdriverChooseOkOnVisibleConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "700938b6-9d14-49a0-ad5e-784c7d358da0",
+      "comment": "",
+      "command": "chooseOkOnNextConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "f51687bb-b6cb-4e5c-af92-de93ccfbf663",
+      "comment": "Видаляємо другий пост",
+      "command": "click",
+      "target": "css=.post-card:nth-child(2) > .post-header > button",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "79392013-2b98-473a-906a-4b7b17acce15",
+      "comment": "",
+      "command": "assertConfirmation",
+      "target": "Ви впевнені, що хочете назавжди видалити цей пост та всі його коментарі?",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "ce6223c3-53f0-4055-b952-6e718ffca660",
+      "comment": "",
+      "command": "webdriverChooseOkOnVisibleConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "5b287680-4f34-46a3-8c09-c8c401608f6f",
+      "comment": "",
+      "command": "chooseOkOnNextConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "08614177-1b19-4338-aa4d-f664e27de55d",
+      "comment": "Видаляємо перший пост",
+      "command": "click",
+      "target": "css=.post-card:nth-child(1) > .post-header > button",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "617f14e6-7754-4f59-a840-639eacbe4048",
+      "comment": "",
+      "command": "assertConfirmation",
+      "target": "Ви впевнені, що хочете назавжди видалити цей пост та всі його коментарі?",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "16eae32b-c31a-4ba2-bf4b-666762e5a031",
+      "comment": "",
+      "command": "webdriverChooseOkOnVisibleConfirmation",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "51712f3f-a323-4898-8398-7d32be077761",
+      "comment": "",
+      "command": "click",
+      "target": "id=headerAvatar",
+      "targets": [
+        ["id=headerAvatar", "id"],
+        ["css=#headerAvatar", "css:finder"],
+        ["xpath=//div[@id='headerAvatar']", "xpath:attributes"],
+        ["xpath=//div/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "61990846-a100-4a58-8742-203a8405236d",
+      "comment": "",
+      "command": "click",
+      "target": "css=.dropdown-item:nth-child(1)",
+      "targets": [
+        ["css=.dropdown-item:nth-child(1)", "css:finder"],
+        ["xpath=//div[@onclick='openSettingsModal()']", "xpath:attributes"],
+        ["xpath=//div[@id='profileMenu']/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "27838e2a-ddb3-4f4d-af21-ea86866aa64a",
+      "comment": "",
+      "command": "click",
+      "target": "css=#settingsModal .close-btn",
+      "targets": [
+        ["css=#settingsModal .close-btn", "css:finder"],
+        ["xpath=//button[@onclick=\"closeModal('settingsModal')\"]", "xpath:attributes"],
+        ["xpath=//div[@id='settingsModal']/div/button", "xpath:idRelative"],
+        ["xpath=//body/div[3]/div/button", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "a6931f51-849f-4ee1-96b3-e97dd303f8e3",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["0f256329-1a70-4d52-98d6-8ac2ae76776b"]
+  }],
+  "urls": ["http://localhost:8080/"],
+  "plugins": []
+}

@@ -6,58 +6,275 @@
     <title>Головна - IT Blog</title>
     <style>
         /* БАЗОВІ СТИЛІ */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; }
-        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
 
         /* ШАПКА ТА НАВІГАЦІЯ */
-        header { background-color: #ffffff; padding: 0.5rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: #1877f2; text-decoration: none; }
+        header {
+            background-color: #ffffff;
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1877f2;
+            text-decoration: none;
+        }
 
         /* ПРОФІЛЬ ТА МЕНЮ */
-        .profile-container { position: relative; }
-        .avatar { width: 40px; height: 40px; background-color: #1877f2; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; user-select: none; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 200px; overflow: hidden; }
-        .dropdown-menu.show { display: block; }
-        .dropdown-item { padding: 12px 16px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #eee; }
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item:hover { background-color: #f0f2f5; }
-        .logout-text { color: #dc3545; }
+        .profile-container {
+            position: relative;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #1877f2;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 200px;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .logout-text {
+            color: #dc3545;
+        }
 
         /* ГОЛОВНИЙ КОНТЕЙНЕР */
-        .container { max-width: 680px; margin: 2rem auto; padding: 0 1rem; }
+        .container {
+            max-width: 680px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
         /* СТВОРЕННЯ ПОСТА */
-        .create-post-box { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; }
-        textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; min-height: 80px; font-family: inherit; margin-bottom: 10px; }
-        .btn { background-color: #1877f2; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn:hover { background-color: #166fe5; }
-        .btn-secondary { background-color: #e4e6eb; color: #050505; }
-        .btn-secondary:hover { background-color: #d8dadf; }
+        .create-post-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #166fe5;
+        }
+
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: #050505;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d8dadf;
+        }
 
         /* КАРТКА ПОСТА */
-        .post-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); margin-bottom: 1.5rem; }
-        .post-header { display: flex; align-items: center; margin-bottom: 1rem; }
-        .post-author { font-weight: bold; cursor: pointer; color: #050505; text-decoration: none; margin-left: 10px; }
-        .post-author:hover { text-decoration: underline; }
-        .post-date { font-size: 0.8em; color: #65676b; margin-left: auto; }
-        .post-content { margin-bottom: 1.5rem; line-height: 1.5; white-space: pre-wrap; }
+        .post-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .post-author {
+            font-weight: bold;
+            cursor: pointer;
+            color: #050505;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .post-author:hover {
+            text-decoration: underline;
+        }
+
+        .post-date {
+            font-size: 0.8em;
+            color: #65676b;
+            margin-left: auto;
+        }
+
+        .post-content {
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
 
         /* КОМЕНТАРІ */
-        .comments-section { border-top: 1px solid #e4e6eb; padding-top: 1rem; }
-        .comment { display: flex; margin-bottom: 10px; background: #f0f2f5; padding: 10px; border-radius: 12px; }
-        .comment-body { margin-left: 10px; flex-grow: 1; }
-        .comment-header { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 4px; }
-        .comment-input-box { display: flex; gap: 10px; margin-top: 10px; }
-        .comment-input-box input { flex-grow: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        .comments-section {
+            border-top: 1px solid #e4e6eb;
+            padding-top: 1rem;
+        }
+
+        .comment {
+            display: flex;
+            margin-bottom: 10px;
+            background: #f0f2f5;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .comment-body {
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .comment-input-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .comment-input-box input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+        }
 
         /* МОДАЛЬНІ ВІКНА */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-overlay.show { display: flex; }
-        .modal-content { background: white; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; position: relative; }
-        .close-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #666; background: none; border: none; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
     </style>
     <script>
         // Захист сторінки
@@ -101,7 +318,8 @@
         </div>
         <div class="form-group">
             <label>Про себе:</label>
-            <p id="viewBio" style="background: #f0f2f5; padding: 10px; border-radius: 8px; min-height: 50px;">Інформація відсутня</p>
+            <p id="viewBio" style="background: #f0f2f5; padding: 10px; border-radius: 8px; min-height: 50px;">Інформація
+                відсутня</p>
         </div>
         <div class="form-group">
             <label>Дата народження:</label>
@@ -148,7 +366,7 @@
 
     // Форматування дати
     function formatDate(dateString) {
-        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const options = {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'};
         return new Date(dateString).toLocaleDateString('uk-UA', options);
     }
 
@@ -203,8 +421,8 @@
 
         const response = await fetch(`${API_BASE}/blog/posts`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: content, authorUsername: currentUser })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({content: content, authorUsername: currentUser})
         });
 
         if (response.ok) {
@@ -245,8 +463,8 @@
 
         const response = await fetch(`${API_BASE}/blog/comments`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId: postId, content: content, authorUsername: currentUser })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({postId: postId, content: content, authorUsername: currentUser})
         });
 
         if (response.ok) {
@@ -262,7 +480,7 @@
     }
 
     // Закривати меню при кліку поза ним
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         if (!event.target.matches('.avatar')) {
             const dropdowns = document.getElementsByClassName("dropdown-menu");
             for (let i = 0; i < dropdowns.length; i++) {
@@ -340,7 +558,7 @@
 
         const response = await fetch(`${API_BASE}/profile/update`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         });
 

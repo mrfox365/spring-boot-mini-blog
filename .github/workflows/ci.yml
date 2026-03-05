@@ -1,0 +1,36 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонуємо код з репозиторію на віртуальну машину
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Встановлюємо Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Запускаємо Maven для прогону тестів
+      - name: Run UNIT Tests with Maven
+        run: mvn -B test --file pom.xml
+
+      # 4. Аналіз стилю коду (CheckStyle)
+      - name: Run CheckStyle
+        run: mvn -B checkstyle:check
+
+      # 5. Аналіз якості коду та пошук багів (SpotBugs)
+      - name: Run SpotBugs
+        run: mvn -B com.github.spotbugs:spotbugs-maven-plugin:check

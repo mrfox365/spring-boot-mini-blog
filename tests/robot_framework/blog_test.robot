@@ -8,7 +8,8 @@ ${BASE_URL}          http://localhost:8080/auth.html
 ${BROWSER}           chrome
 ${LOGIN_INPUT}       id=loginUsername
 ${PASSWORD_INPUT}    id=loginPassword
-${LOGIN_BTN}         css=#loginForm > button
+# Зробили локатор кнопки надійнішим (щоб не клікав на "Забули пароль")
+${LOGIN_BTN}         css=#loginForm button[onclick='login()']
 ${POST_TEXTAREA}     id=newPostContent
 ${SUBMIT_POST_BTN}   css=.create-post-box .btn
 
@@ -39,13 +40,13 @@ Complex User Scenario With Posts Comments And Profile
     Delete Nth Post    3
     Sleep    1s
 
-    # 5. ВИДАЛЕННЯ: Пост 2 тепер став другим за рахунком. Спочатку видаляємо його комент, потім сам пост
+    # 5. ВИДАЛЕННЯ: Пост 2 тепер став другим за рахунком
     Delete Comment In Nth Post    2
     Sleep    1s
     Delete Nth Post    2
     Sleep    1s
 
-    # 6. ВИДАЛЕННЯ: Пост 3 тепер став першим за рахунком. Видаляємо його одразу (комент видалиться каскадно)
+    # 6. ВИДАЛЕННЯ: Пост 3 тепер став першим за рахунком
     Delete Nth Post    1
     Sleep    1s
 
@@ -69,7 +70,9 @@ Complex User Scenario With Posts Comments And Profile
 *** Keywords ***
 Open Browser To Login Page
     Open Browser    ${BASE_URL}    ${BROWSER}
-    Maximize Browser Window
+    # ФІКС 1: Задаємо великий розмір екрану (замість Maximize Browser Window),
+    # щоб пости менше скролилися у Headless-режимі
+    Set Window Size    1920    1080
 
 Login As Valid User
     [Arguments]    ${username}    ${password}
@@ -89,12 +92,17 @@ Add Comment To Nth Post
 
 Delete Nth Post
     [Arguments]    ${post_index}
-    Click Element    css=.post-card:nth-child(${post_index}) .post-header button
+    ${btn}=    Get WebElement    css=.post-card:nth-child(${post_index}) .post-header button
+    # ФІКС 2: Використовуємо JavaScript для кліку! Це гарантує, що клік пройде,
+    # навіть якщо кнопка сховалася під sticky-header'ом.
+    Execute Javascript    arguments[0].click();    ARGUMENTS    ${btn}
     Handle Alert     action=ACCEPT
 
 Delete Comment In Nth Post
     [Arguments]    ${post_index}
-    Click Element    css=.post-card:nth-child(${post_index}) .comment button
+    ${btn}=    Get WebElement    css=.post-card:nth-child(${post_index}) .comment button
+    # Використовуємо JavaScript клік
+    Execute Javascript    arguments[0].click();    ARGUMENTS    ${btn}
     Handle Alert     action=ACCEPT
 
 Open Profile Settings

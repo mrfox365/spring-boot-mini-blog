@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * Service class for managing blog posts and comments.
@@ -47,12 +50,16 @@ public class BlogService {
   }
 
   /**
-   * Retrieves all blog posts sorted by creation date descending.
+   * Retrieves a paginated list of blog posts sorted by creation date descending.
    *
-   * @return a list of post responses
+   * @param page the page number (starts from 0)
+   * @param size the number of posts per page
+   * @return a list of post responses for the requested page
    */
-  public List<PostResponse> getAllPosts() {
-    return postRepository.findAllByOrderByCreatedAtDesc().stream().map(post -> {
+  public List<PostResponse> getAllPosts(int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    return postRepository.findAll(pageable).getContent().stream().map(post -> {
       PostResponse dto = new PostResponse();
       dto.setId(post.getId());
       dto.setContent(post.getContent());

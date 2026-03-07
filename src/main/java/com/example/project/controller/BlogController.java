@@ -40,13 +40,18 @@ public class BlogController {
   }
 
   /**
-   * Retrieves all blog posts.
+   * Retrieves blog posts with pagination.
    *
+   * @param page page number (default 0)
+   * @param size number of records per page (default 20)
    * @return a list of post responses
    */
   @GetMapping("/posts")
-  public ResponseEntity<List<PostResponse>> getAllPosts() {
-    return ResponseEntity.ok(blogService.getAllPosts());
+  public ResponseEntity<List<PostResponse>> getAllPosts(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size
+  ) {
+    return ResponseEntity.ok(blogService.getAllPosts(page, size));
   }
 
   /**

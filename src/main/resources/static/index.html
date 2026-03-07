@@ -356,7 +356,8 @@
 </div>
 
 <script>
-    const API_BASE = 'http://localhost:8080/api';
+    const API_BASE = '/api';
+    let currentPage = 0; // Додана змінна для відстеження поточної сторінки
 
     // Захист сторінки
     if (!localStorage.getItem('isAuthenticated')) {
@@ -369,7 +370,7 @@
         if (!currentUser) return;
 
         document.getElementById('headerAvatar').innerText = currentUser.charAt(0).toUpperCase();
-        loadPosts();
+        loadPosts(0); // Завантажуємо першу сторінку
     });
 
     // Форматування дати
@@ -380,15 +381,26 @@
 
     // ================= ПОСТИ ТА КОМЕНТАРІ =================
 
-    async function loadPosts() {
+    // Додано підтримку пагінації у функцію loadPosts
+    async function loadPosts(page = 0) {
+        currentPage = page;
         try {
-            const response = await fetch(`${API_BASE}/blog/posts`);
+            // Передаємо page та size у запиті
+            const response = await fetch(`${API_BASE}/blog/posts?page=${page}&size=20`);
             const posts = await response.json();
             const container = document.getElementById('feedContainer');
             container.innerHTML = '';
 
-            if (posts.length === 0) {
+            // Якщо записів немає взагалі (на першій сторінці)
+            if (posts.length === 0 && page === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #666;">Поки що немає записів. Будьте першим!</p>';
+                return;
+            }
+
+            // Якщо записів немає на наступних сторінках
+            if (posts.length === 0 && page > 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">Немає більше записів.</p>';
+                renderPaginationControls(0);
                 return;
             }
 
@@ -424,9 +436,37 @@
                 // Відразу завантажуємо коментарі до цього поста
                 loadComments(post.id);
             }
+
+            // МАЛЮЄМО КНОПКИ ПАГІНАЦІЇ ВНИЗУ
+            renderPaginationControls(posts.length);
+
         } catch (error) {
             console.error('Помилка завантаження постів:', error);
         }
+    }
+
+    // Нова функція для відображення кнопок навігації
+    function renderPaginationControls(loadedPostsCount) {
+        const container = document.getElementById('feedContainer');
+        const paginationDiv = document.createElement('div');
+        paginationDiv.style = "display: flex; justify-content: space-between; margin-top: 20px;";
+
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn btn-secondary';
+        prevBtn.innerText = '← Попередня сторінка';
+        prevBtn.disabled = currentPage === 0; // Вимикаємо на першій сторінці
+        prevBtn.onclick = () => loadPosts(currentPage - 1);
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn btn-secondary';
+        nextBtn.innerText = 'Наступна сторінка →';
+        // Якщо повернулося менше 20 записів, значить це остання сторінка
+        nextBtn.disabled = loadedPostsCount < 20;
+        nextBtn.onclick = () => loadPosts(currentPage + 1);
+
+        paginationDiv.appendChild(prevBtn);
+        paginationDiv.appendChild(nextBtn);
+        container.appendChild(paginationDiv);
     }
 
     async function submitPost() {
@@ -441,7 +481,7 @@
 
         if (response.ok) {
             document.getElementById('newPostContent').value = '';
-            loadPosts();
+            loadPosts(0); // Завжди повертаємось на 1-шу сторінку після створення
         } else {
             alert('Помилка створення поста');
         }
@@ -455,7 +495,7 @@
                 method: 'DELETE'
             });
             if (response.ok) {
-                loadPosts(); // Оновлюємо стрічку після видалення
+                loadPosts(0); // Повертаємось на першу сторінку після видалення
             } else {
                 const text = await response.text();
                 alert('Помилка: ' + text);

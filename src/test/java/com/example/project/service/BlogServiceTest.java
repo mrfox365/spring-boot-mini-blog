@@ -27,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Unit tests for BlogService.
@@ -101,10 +104,16 @@ class BlogServiceTest {
 
   @Test
   void getAllPosts_ReturnsMappedDtoList() {
-    when(postRepository.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(testPost));
+    // 1. Створюємо "фейкову" сторінку (Page), яка містить наш тестовий пост
+    Page<Post> postPage = new PageImpl<>(List.of(testPost));
 
-    List<PostResponse> responses = blogService.getAllPosts();
+    // 2. Вказуємо Mockito повертати цю сторінку, коли викликається findAll(Pageable)
+    when(postRepository.findAll(any(Pageable.class))).thenReturn(postPage);
 
+    // 3. Викликаємо оновлений метод сервісу (передаємо сторінку 0, розмір 20)
+    List<PostResponse> responses = blogService.getAllPosts(0, 20);
+
+    // 4. Перевірки (assertions) залишаються без змін!
     assertNotNull(responses);
     assertEquals(1, responses.size());
     assertEquals(100L, responses.get(0).getId());

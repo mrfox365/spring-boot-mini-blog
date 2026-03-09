@@ -1,19 +1,16 @@
 package com.example.project.controller;
 
-import com.example.project.dto.ProfileDto.UpdateProfileRequest;
 import com.example.project.dto.ProfileDto.UserProfileResponse;
+import com.example.project.dto.ProfileDto.UpdateProfileRequest;
 import com.example.project.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 /**
- * Controller for handling user profile operations.
+ * Controller for handling user profile-related operations.
  */
 @RestController
 @RequestMapping("/api/profile")
@@ -23,30 +20,36 @@ public class ProfileController {
   private ProfileService profileService;
 
   /**
-   * Retrieves the profile data for a specific user.
+   * Retrieves the public profile information of a user.
    *
-   * @param username the target username
-   * @return the user profile response or an error message
+   * @param username the username of the profile to retrieve
+   * @return a response containing the user profile data or a 404 status if not found
    */
   @GetMapping("/{username}")
-  public ResponseEntity<?> getProfile(@PathVariable String username) {
+  public ResponseEntity<UserProfileResponse> getProfile(@PathVariable String username) {
     try {
-      return ResponseEntity.ok(profileService.getProfile(username));
+      UserProfileResponse profile = profileService.getProfile(username);
+      return ResponseEntity.ok(profile);
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+      return ResponseEntity.notFound().build();
     }
   }
 
   /**
-   * Updates the profile data for the authenticated user.
+   * Updates the profile information for the currently authenticated user.
    *
-   * @param request the update profile request
-   * @return a success response or an error message
+   * @param request   the new profile data
+   * @param principal the security context of the authenticated user
+   * @return a success message or an error response
    */
   @PutMapping("/update")
-  public ResponseEntity<String> updateProfile(@RequestBody UpdateProfileRequest request) {
+  public ResponseEntity<String> updateProfile(@RequestBody UpdateProfileRequest request, Principal principal) {
+    if (principal == null) {
+      return ResponseEntity.status(401).body("Unauthorized");
+    }
     try {
-      profileService.updateProfile(request);
+      // The current username is taken directly from the secure Principal context
+      profileService.updateProfile(principal.getName(), request);
       return ResponseEntity.ok("Profile updated successfully");
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());

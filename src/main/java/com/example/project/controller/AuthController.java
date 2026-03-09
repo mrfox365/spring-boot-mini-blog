@@ -6,13 +6,15 @@ import com.example.project.dto.RegisterRequest;
 import com.example.project.dto.ResetPasswordRequest;
 import com.example.project.dto.VerifyRequest;
 import com.example.project.service.AuthService;
+import com.example.project.security.JwtService;
+import com.example.project.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Controller for handling authentication and registration operations.
@@ -24,33 +26,33 @@ public class AuthController {
   @Autowired
   private AuthService authService;
 
+  @Autowired
+  private JwtService jwtService;
+
   /**
-   * Sends a registration verification code to the provided email.
+   * Sends a registration verification code to the user's email.
    *
-   * @param request the registration request containing user details
-   * @return a success or error response entity
+   * @param request the registration details
+   * @return a response indicating the result of the operation
    */
   @PostMapping("/send-code")
   public ResponseEntity<String> sendCode(@RequestBody RegisterRequest request) {
     try {
       authService.sendRegistrationCode(request.getEmail());
-      return ResponseEntity.ok("Код успішно відправлено на пошту");
+      return ResponseEntity.ok("Verification code sent successfully");
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("Помилка відправки листа");
     }
   }
 
   /**
-   * Verifies the confirmation code and saves the new user to the database.
+   * Completes the user registration process using a verification code.
    *
-   * @param request the verification request
-   * @return a success or error response entity
+   * @param request the verification data including code and credentials
+   * @return a success or error response
    */
-  @PostMapping("/verify-and-save")
-  public ResponseEntity<String> verifyAndSave(@RequestBody VerifyRequest request) {
+  @PostMapping("/register")
+  public ResponseEntity<String> register(@RequestBody VerifyRequest request) {
     try {
       authService.completeRegistration(
           request.getUsername(),
@@ -58,56 +60,58 @@ public class AuthController {
           request.getPassword(),
           request.getCode()
       );
-      return ResponseEntity.ok("Реєстрація успішно завершена");
+      return ResponseEntity.ok("Registration successful");
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   /**
-   * Authenticates a user based on their login (username or email) and password.
+   * Authenticates a user and generates a JWT token upon success.
    *
-   * @param request the login request
-   * @return a success or error response entity
+   * @param request the login credentials
+   * @return a response containing the JWT token and user info
    */
   @PostMapping("/login")
-  public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-    boolean isAuthenticated = authService.authenticate(request.getLogin(), request.getPassword());
+  public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    User user = authService.authenticate(request.getLogin(), request.getPassword());
 
-    if (isAuthenticated) {
-      // In a full-fledged application, a JWT token is usually generated and returned here
-      return ResponseEntity.ok("Вхід успішний!");
+    if (user != null) {
+      String token = jwtService.generateToken(user.getUsername());
+
+      Map<String, String> response = new HashMap<>();
+      response.put("token", token);
+      response.put("username", user.getUsername());
+
+      return ResponseEntity.ok(response);
     } else {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Невірний логін або пароль");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid login or password");
     }
   }
 
   /**
-   * Initiates the password reset process by sending an email link.
+   * Initiates the password reset process by sending a link to the email.
    *
-   * @param request the email request
-   * @return a success message
+   * @param request the request containing user's email
+   * @return a response message
    */
   @PostMapping("/forgot-password")
   public ResponseEntity<String> forgotPassword(@RequestBody EmailRequest request) {
-    // We always return OK to avoid revealing if the email exists (protection against Enumeration)
     authService.initiatePasswordReset(request.getEmail());
-    return ResponseEntity.ok(
-        "Якщо вказаний email існує, на нього відправлено посилання для відновлення"
-    );
+    return ResponseEntity.ok("If the account exists, a reset link has been sent to the email provided");
   }
 
   /**
-   * Resets the user's password using the provided security token.
+   * Resets the user password using a security token.
    *
-   * @param request the reset password request containing the token and new password
-   * @return a success or error response entity
+   * @param request the password reset data including token and new password
+   * @return a response indicating the result
    */
   @PostMapping("/reset-password")
   public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
     try {
       authService.resetPassword(request.getToken(), request.getNewPassword());
-      return ResponseEntity.ok("Пароль успішно змінено");
+      return ResponseEntity.ok("Password updated successfully");
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

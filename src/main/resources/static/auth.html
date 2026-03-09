@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Авторизація</title>
+    <title>Authentication - IT Blog</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,262 +49,199 @@
         button {
             width: 100%;
             padding: 10px;
-            background-color: #007bff;
+            background-color: #1877f2;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-bottom: 10px;
-            font-weight: bold;
+            font-size: 16px;
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #166fe5;
         }
 
-        .link-btn {
-            background: none;
-            color: #007bff;
-            border: none;
-            padding: 0;
+        .toggle-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #1877f2;
             cursor: pointer;
+        }
+
+        .toggle-link:hover {
             text-decoration: underline;
-            width: auto;
-            display: inline-block;
-            font-weight: normal;
         }
 
-        .link-btn:hover {
-            background: none;
-            color: #0056b3;
-        }
-
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-        }
-
-        .code-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .code-group input {
-            margin-bottom: 0;
-        }
-
-        .code-group button {
-            width: auto;
-            white-space: nowrap;
-            margin-bottom: 0;
+        .error-msg {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <div id="loginForm" class="form-section active">
-        <h2>Вхід</h2>
-        <input type="text" placeholder="Нікнейм або Email" id="loginUsername">
-        <input type="password" placeholder="Пароль" id="loginPassword">
-        <div class="flex-between" style="margin-bottom: 15px;">
-            <button class="link-btn" onclick="showSection('forgotPasswordForm')">Забули пароль?</button>
-        </div>
-        <button onclick="login()">Увійти</button>
-        <div style="text-align: center; margin-top: 15px;">
-            Немає акаунту?
-            <button class="link-btn" onclick="showSection('registerStep1')">Зареєструватися</button>
-        </div>
+        <h2>Login</h2>
+        <div id="loginError" class="error-msg">Invalid username or password</div>
+        <input type="text" id="loginUsername" placeholder="Username or Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login()">Sign In</button>
+        <div class="toggle-link" onclick="showSection('registerForm')">Create new account</div>
+        <div class="toggle-link" onclick="showSection('forgotForm')" style="font-size: 0.9em; color: #666;">Forgot password?</div>
     </div>
 
-    <div id="registerStep1" class="form-section">
-        <h2>Реєстрація (Крок 1)</h2>
-        <input type="text" placeholder="Нікнейм" id="regNickname">
-        <input type="password" placeholder="Пароль" id="regPassword">
-        <input type="password" placeholder="Підтвердження паролю" id="regPasswordConfirm">
-        <button onclick="goToRegisterStep2()">Далі</button>
-        <div style="text-align: center; margin-top: 15px;">
-            <button class="link-btn" onclick="showSection('loginForm')">Повернутися до входу</button>
-        </div>
+    <div id="registerForm" class="form-section">
+        <h2>Registration</h2>
+        <input type="text" id="regNickname" placeholder="Username">
+        <input type="email" id="regEmail" placeholder="Email">
+        <input type="password" id="regPassword" placeholder="Password">
+        <input type="password" id="regPasswordConfirm" placeholder="Confirm Password">
+        <button onclick="sendVerificationCode()" style="background-color: #28a745;">Get Verification Code</button>
+        <div class="toggle-link" onclick="showSection('loginForm')">Already have an account? Login</div>
     </div>
 
-    <div id="registerStep2" class="form-section">
-        <h2>Підтвердження Email</h2>
-        <input type="email" placeholder="Введіть Email" id="regEmail">
-        <button onclick="sendCode()" style="background-color: #28a745;">Надіслати код</button>
-
-        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
-            <p style="font-size: 0.9em; margin-top: 0; color: #555;">Введіть код з листа:</p>
-            <div class="code-group">
-                <input type="text" placeholder="123456" id="regCode">
-                <button onclick="completeRegistration()">Завершити</button>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 15px;">
-            <button class="link-btn" onclick="showSection('registerStep1')">Назад</button>
-        </div>
+    <div id="verifyForm" class="form-section">
+        <h2>Verify Email</h2>
+        <p style="font-size: 0.9em; color: #555; text-align: center;">Enter the 6-digit code sent to your email.</p>
+        <input type="text" id="regCode" placeholder="Verification Code">
+        <button onclick="completeRegistration()" style="background-color: #28a745;">Complete Registration</button>
+        <div class="toggle-link" onclick="showSection('registerForm')">Back to registration</div>
     </div>
 
-    <div id="forgotPasswordForm" class="form-section">
-        <h2>Відновлення пароля</h2>
-        <p style="font-size: 0.9em; color: #555;">Введіть пошту, яку вказували при реєстрації. Ми надішлемо посилання
-            для створення нового пароля.</p>
-        <input type="email" placeholder="Ваш Email" id="forgotEmail">
-        <button onclick="requestPasswordReset()">Надіслати посилання</button>
-        <div style="text-align: center; margin-top: 15px;">
-            <button class="link-btn" onclick="showSection('loginForm')">Повернутися до входу</button>
-        </div>
+    <div id="forgotForm" class="form-section">
+        <h2>Reset Password</h2>
+        <p style="font-size: 0.9em; color: #555; text-align: center;">Enter your Email. If it exists in our database, we will send a reset link.</p>
+        <input type="email" id="forgotEmail" placeholder="Your Email">
+        <button onclick="requestPasswordReset()">Send Reset Link</button>
+        <div class="toggle-link" onclick="showSection('loginForm')">Back to login</div>
     </div>
-
 </div>
 
 <script>
     const API_BASE = '/api/auth';
 
-    // Перемикання між вікнами форми
+    /**
+     * Helper to retrieve the CSRF token from the XSRF-TOKEN cookie.
+     */
+    function getCsrfToken() {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; XSRF-TOKEN=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
+
     function showSection(sectionId) {
         document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
         document.getElementById(sectionId).classList.add('active');
     }
 
-    // ВХІД
     async function login() {
-        const loginVal = document.getElementById('loginUsername').value;
-        const passVal = document.getElementById('loginPassword').value;
-
-        if (!loginVal || !passVal) {
-            alert('Будь ласка, введіть логін та пароль!');
-            return;
-        }
+        const user = document.getElementById('loginUsername').value;
+        const pass = document.getElementById('loginPassword').value;
 
         try {
             const response = await fetch(`${API_BASE}/login`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({login: loginVal, password: passVal})
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify({login: user, password: pass})
             });
-            const text = await response.text();
 
             if (response.ok) {
-                // Зберігаємо статус авторизації в браузері
+                const data = await response.json();
                 localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('currentUser', loginVal);
-
-                // Перенаправляємо на головну сторінку блогу
+                localStorage.setItem('currentUser', data.username);
+                localStorage.setItem('jwtToken', data.token);
                 window.location.href = '/index.html';
             } else {
-                alert('Помилка: ' + text);
+                document.getElementById('loginError').style.display = 'block';
             }
         } catch (error) {
-            alert('Помилка з\'єднання з сервером');
+            alert('Server connection error');
         }
     }
 
-    // ПЕРЕХІД НА КРОК 2 РЕЄСТРАЦІЇ
-    async function goToRegisterStep2() {
-        const username = document.getElementById('regNickname').value;
+    async function sendVerificationCode() {
+        const email = document.getElementById('regEmail').value;
         const pass = document.getElementById('regPassword').value;
         const confirm = document.getElementById('regPasswordConfirm').value;
 
-        if (!username || !pass) {
-            alert('Заповніть всі поля!');
-            return;
-        }
-        if (pass !== confirm) {
-            alert('Паролі не співпадають!');
-            return;
-        }
-
-        showSection('registerStep2');
-    }
-
-    // ВІДПРАВКА КОДУ НА ПОШТУ
-    async function sendCode() {
-        const email = document.getElementById('regEmail').value;
-        if (!email) {
-            alert('Введіть email!');
-            return;
-        }
+        if (pass !== confirm) return alert('Passwords do not match!');
+        if (!email) return alert('Please enter your email!');
 
         try {
             const response = await fetch(`${API_BASE}/send-code`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email: email})
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify({ email: email })
             });
-            const text = await response.text();
 
             if (response.ok) {
-                alert('Код відправлено на пошту!');
+                alert('Verification code sent! Please check your email.');
+                showSection('verifyForm');
             } else {
-                alert('Помилка: ' + text);
+                alert('Error: ' + await response.text());
             }
         } catch (error) {
-            alert('Помилка з\'єднання');
+            alert('Connection error');
         }
     }
 
-    // ЗАВЕРШЕННЯ РЕЄСТРАЦІЇ
     async function completeRegistration() {
-        const username = document.getElementById('regNickname').value;
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPassword').value;
-        const code = document.getElementById('regCode').value;
-
-        if (!code) {
-            alert('Введіть код підтвердження з листа!');
-            return;
-        }
+        const payload = {
+            username: document.getElementById('regNickname').value,
+            email: document.getElementById('regEmail').value,
+            password: document.getElementById('regPassword').value,
+            code: document.getElementById('regCode').value
+        };
 
         try {
-            const response = await fetch(`${API_BASE}/verify-and-save`, {
+            const response = await fetch(`${API_BASE}/register`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: username, email: email, password: pass, code: code})
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
+                body: JSON.stringify(payload)
             });
-            const text = await response.text();
 
             if (response.ok) {
-                alert('Реєстрація успішна! Тепер ви можете увійти.');
+                alert('Registration successful! You can now log in.');
                 showSection('loginForm');
-
-                // Очищаємо поля після успішної реєстрації
-                document.getElementById('regNickname').value = '';
-                document.getElementById('regPassword').value = '';
-                document.getElementById('regPasswordConfirm').value = '';
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regCode').value = '';
             } else {
-                alert('Помилка: ' + text);
+                alert('Error: ' + await response.text());
             }
         } catch (error) {
-            alert('Помилка з\'єднання');
+            alert('Connection error');
         }
     }
 
-    // ЗАПИТ НА ВІДНОВЛЕННЯ ПАРОЛЯ
     async function requestPasswordReset() {
         const email = document.getElementById('forgotEmail').value;
-        if (!email) {
-            alert('Введіть email!');
-            return;
-        }
+        if (!email) return alert('Please enter your email!');
 
         try {
             const response = await fetch(`${API_BASE}/forgot-password`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
                 body: JSON.stringify({email: email})
             });
-            const text = await response.text();
-            alert(text);
+            alert(await response.text());
         } catch (error) {
-            alert('Помилка з\'єднання');
+            alert('Connection error');
         }
     }
 </script>
-
 </body>
 </html>

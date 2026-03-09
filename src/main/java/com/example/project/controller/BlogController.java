@@ -6,6 +6,7 @@ import com.example.project.dto.BlogResponses.CommentResponse;
 import com.example.project.dto.BlogResponses.PostResponse;
 import com.example.project.service.BlogService;
 import java.util.List;
+import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -80,36 +81,28 @@ public class BlogController {
   /**
    * Deletes a specific post.
    *
-   * @param postId   the ID of the post to delete
-   * @param username the user requesting deletion
+   * @param postId    the ID of the post to delete
+   * @param principal the authenticated user requesting deletion
    * @return a success or error response entity
    */
   @DeleteMapping("/posts/{postId}")
   public ResponseEntity<String> deletePost(
-      @PathVariable Long postId, @RequestParam String username) {
-    try {
-      blogService.deletePost(postId, username);
-      return ResponseEntity.ok("Post deleted successfully");
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+      @PathVariable Long postId, Principal principal) {
+    blogService.deletePost(postId, principal.getName());
+    return ResponseEntity.ok("Post deleted successfully");
   }
 
   /**
    * Deletes a specific comment.
    *
    * @param commentId the ID of the comment to delete
-   * @param username  the user requesting deletion
+   * @param principal the authenticated user requesting deletion
    * @return a success or error response entity
    */
   @DeleteMapping("/comments/{commentId}")
   public ResponseEntity<String> deleteComment(
-      @PathVariable Long commentId, @RequestParam String username) {
-    try {
-      blogService.deleteComment(commentId, username);
-      return ResponseEntity.ok("Comment deleted successfully");
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
+      @PathVariable Long commentId, Principal principal) {
+    blogService.deleteComment(commentId, principal.getName());
+    return ResponseEntity.ok("Comment deleted successfully");
   }
 }

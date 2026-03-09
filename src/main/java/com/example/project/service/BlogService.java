@@ -20,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 /**
- * Service class for managing blog posts and comments.
+ * Service class for managing blog posts and user comments.
  */
 @Service
 public class BlogService {
@@ -35,9 +35,10 @@ public class BlogService {
   private UserRepository userRepository;
 
   /**
-   * Creates a new blog post.
+   * Creates a new blog post in the system.
    *
-   * @param request the request containing post content and author data
+   * @param request the request data containing content and author information
+   * @throws IllegalArgumentException if the author is not found
    */
   public void createPost(CreatePostRequest request) {
     User author = userRepository.findByUsername(request.getAuthorUsername())
@@ -50,11 +51,11 @@ public class BlogService {
   }
 
   /**
-   * Retrieves a paginated list of blog posts sorted by creation date descending.
+   * Retrieves a paginated list of all blog posts, sorted by creation date.
    *
-   * @param page the page number (starts from 0)
-   * @param size the number of posts per page
-   * @return a list of post responses for the requested page
+   * @param page the requested page index
+   * @param size the number of items per page
+   * @return a list of post response DTOs
    */
   public List<PostResponse> getAllPosts(int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -70,9 +71,10 @@ public class BlogService {
   }
 
   /**
-   * Adds a new comment to an existing post.
+   * Adds a new comment to a specified blog post.
    *
-   * @param request the request containing comment content and target post
+   * @param request the request data containing content, author, and post ID
+   * @throws IllegalArgumentException if the author or post is not found
    */
   public void addComment(CreateCommentRequest request) {
     User author = userRepository.findByUsername(request.getAuthorUsername())
@@ -88,10 +90,10 @@ public class BlogService {
   }
 
   /**
-   * Retrieves all comments for a specific post.
+   * Retrieves all comments associated with a specific post.
    *
-   * @param postId the unique identifier of the post
-   * @return a list of comment responses
+   * @param postId the identifier of the post
+   * @return a list of comment response DTOs ordered by creation time
    */
   public List<CommentResponse> getCommentsForPost(Long postId) {
     return commentRepository.findByPostIdOrderByCreatedAtAsc(postId).stream().map(comment -> {
@@ -105,10 +107,11 @@ public class BlogService {
   }
 
   /**
-   * Deletes a post and all its associated comments.
+   * Deletes a post and all its related comments from the database.
    *
-   * @param postId   the ID of the post
-   * @param username the username of the user requesting deletion
+   * @param postId   the identifier of the post to delete
+   * @param username the username of the person requesting deletion for verification
+   * @throws IllegalArgumentException if the post is not found or user is not the author
    */
   @Transactional
   public void deletePost(Long postId, String username) {
@@ -119,17 +122,16 @@ public class BlogService {
       throw new IllegalArgumentException("You can only delete your own posts");
     }
 
-    // First delete all comments related to this post to avoid foreign key constraints
     commentRepository.deleteAllByPostId(postId);
-    // Then delete the post itself
     postRepository.delete(post);
   }
 
   /**
-   * Deletes a specific comment.
+   * Deletes a specific comment from the database.
    *
-   * @param commentId the ID of the comment
-   * @param username  the username of the user requesting deletion
+   * @param commentId the identifier of the comment to delete
+   * @param username  the username of the person requesting deletion for verification
+   * @throws IllegalArgumentException if the comment is not found or user is not the author
    */
   @Transactional
   public void deleteComment(Long commentId, String username) {

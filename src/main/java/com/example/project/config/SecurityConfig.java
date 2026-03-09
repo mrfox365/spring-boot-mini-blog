@@ -21,13 +21,14 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 /**
  * Security configuration class for the application.
- * Defines authentication, authorization rules, and CSRF protection mechanisms
+ * Defines authentication, authorization rules, and strict CSP protection mechanisms
  * compatible with Single Page Applications (SPA).
  */
 @Configuration
@@ -50,7 +51,7 @@ public class SecurityConfig {
   /**
    * Configures the security filter chain for HTTP requests.
    * Sets up stateless session management, JWT filtering, and cookie-based CSRF protection.
-   * Disables lazy CSRF token generation to ensure immediate token availability.
+   * Implements strict Content Security Policy without unsafe-inline.
    *
    * @param http the HttpSecurity object to configure
    * @return the constructed SecurityFilterChain
@@ -58,11 +59,16 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    // Configure request handler to disable lazy CSRF token generation
     CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
     requestHandler.setCsrfRequestAttributeName(null);
 
     http
+        .headers(headers -> headers
+            // Максимально безпечний CSP: забороняє будь-які вбудовані скрипти та стилі
+            .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'"))
+            .frameOptions(frame -> frame.deny())
+            .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+        )
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .csrfTokenRequestHandler(requestHandler)
@@ -88,7 +94,6 @@ public class SecurityConfig {
 
   /**
    * Internal filter designed to force the resolution of the CSRF token.
-   * This ensures that the XSRF-TOKEN cookie is populated in the response.
    */
   private static final class CsrfCookieFilter extends OncePerRequestFilter {
     @Override
@@ -96,7 +101,7 @@ public class SecurityConfig {
         throws ServletException, IOException {
       CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
       if (csrfToken != null) {
-        csrfToken.getToken(); // Forces cookie generation
+        csrfToken.getToken();
       }
       filterChain.doFilter(request, response);
     }

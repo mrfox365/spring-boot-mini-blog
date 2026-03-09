@@ -4,93 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authentication - IT Blog</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f2f5;
-            margin: 0;
-        }
-
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .form-section {
-            display: none;
-        }
-
-        .form-section.active {
-            display: block;
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #1877f2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #166fe5;
-        }
-
-        .toggle-link {
-            text-align: center;
-            margin-top: 15px;
-            color: #1877f2;
-            cursor: pointer;
-        }
-
-        .toggle-link:hover {
-            text-decoration: underline;
-        }
-
-        .error-msg {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="auth-page">
 
-<div class="container">
+<div class="auth-container">
     <div id="loginForm" class="form-section active">
         <h2>Login</h2>
         <div id="loginError" class="error-msg">Invalid username or password</div>
         <input type="text" id="loginUsername" placeholder="Username or Email">
         <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="login()">Sign In</button>
-        <div class="toggle-link" onclick="showSection('registerForm')">Create new account</div>
-        <div class="toggle-link" onclick="showSection('forgotForm')" style="font-size: 0.9em; color: #666;">Forgot password?</div>
+        <button id="loginBtn">Sign In</button>
+        <div class="toggle-link" id="linkToReg">Create new account</div>
+        <div class="toggle-link small-text" id="linkToForgot">Forgot password?</div>
     </div>
 
     <div id="registerForm" class="form-section">
@@ -99,149 +25,27 @@
         <input type="email" id="regEmail" placeholder="Email">
         <input type="password" id="regPassword" placeholder="Password">
         <input type="password" id="regPasswordConfirm" placeholder="Confirm Password">
-        <button onclick="sendVerificationCode()" style="background-color: #28a745;">Get Verification Code</button>
-        <div class="toggle-link" onclick="showSection('loginForm')">Already have an account? Login</div>
+        <button class="btn-success" id="getRegCodeBtn">Get Verification Code</button>
+        <div class="toggle-link" id="linkToLoginFromReg">Already have an account? Login</div>
     </div>
 
     <div id="verifyForm" class="form-section">
         <h2>Verify Email</h2>
-        <p style="font-size: 0.9em; color: #555; text-align: center;">Enter the 6-digit code sent to your email.</p>
+        <p class="info-text">Enter the 6-digit code sent to your email.</p>
         <input type="text" id="regCode" placeholder="Verification Code">
-        <button onclick="completeRegistration()" style="background-color: #28a745;">Complete Registration</button>
-        <div class="toggle-link" onclick="showSection('registerForm')">Back to registration</div>
+        <button class="btn-success" id="completeRegBtn">Complete Registration</button>
+        <div class="toggle-link" id="linkToRegFromVerify">Back to registration</div>
     </div>
 
     <div id="forgotForm" class="form-section">
         <h2>Reset Password</h2>
-        <p style="font-size: 0.9em; color: #555; text-align: center;">Enter your Email. If it exists in our database, we will send a reset link.</p>
+        <p class="info-text">Enter your Email. If it exists in our database, we will send a reset link.</p>
         <input type="email" id="forgotEmail" placeholder="Your Email">
-        <button onclick="requestPasswordReset()">Send Reset Link</button>
-        <div class="toggle-link" onclick="showSection('loginForm')">Back to login</div>
+        <button id="sendResetLinkBtn">Send Reset Link</button>
+        <div class="toggle-link" id="linkToLoginFromForgot">Back to login</div>
     </div>
 </div>
 
-<script>
-    const API_BASE = '/api/auth';
-
-    /**
-     * Helper to retrieve the CSRF token from the XSRF-TOKEN cookie.
-     */
-    function getCsrfToken() {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; XSRF-TOKEN=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return '';
-    }
-
-    function showSection(sectionId) {
-        document.querySelectorAll('.form-section').forEach(el => el.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-    }
-
-    async function login() {
-        const user = document.getElementById('loginUsername').value;
-        const pass = document.getElementById('loginPassword').value;
-
-        try {
-            const response = await fetch(`${API_BASE}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': getCsrfToken()
-                },
-                body: JSON.stringify({login: user, password: pass})
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('currentUser', data.username);
-                localStorage.setItem('jwtToken', data.token);
-                window.location.href = '/index.html';
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        } catch (error) {
-            alert('Server connection error');
-        }
-    }
-
-    async function sendVerificationCode() {
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regPasswordConfirm').value;
-
-        if (pass !== confirm) return alert('Passwords do not match!');
-        if (!email) return alert('Please enter your email!');
-
-        try {
-            const response = await fetch(`${API_BASE}/send-code`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': getCsrfToken()
-                },
-                body: JSON.stringify({ email: email })
-            });
-
-            if (response.ok) {
-                alert('Verification code sent! Please check your email.');
-                showSection('verifyForm');
-            } else {
-                alert('Error: ' + await response.text());
-            }
-        } catch (error) {
-            alert('Connection error');
-        }
-    }
-
-    async function completeRegistration() {
-        const payload = {
-            username: document.getElementById('regNickname').value,
-            email: document.getElementById('regEmail').value,
-            password: document.getElementById('regPassword').value,
-            code: document.getElementById('regCode').value
-        };
-
-        try {
-            const response = await fetch(`${API_BASE}/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': getCsrfToken()
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                alert('Registration successful! You can now log in.');
-                showSection('loginForm');
-            } else {
-                alert('Error: ' + await response.text());
-            }
-        } catch (error) {
-            alert('Connection error');
-        }
-    }
-
-    async function requestPasswordReset() {
-        const email = document.getElementById('forgotEmail').value;
-        if (!email) return alert('Please enter your email!');
-
-        try {
-            const response = await fetch(`${API_BASE}/forgot-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': getCsrfToken()
-                },
-                body: JSON.stringify({email: email})
-            });
-            alert(await response.text());
-        } catch (error) {
-            alert('Connection error');
-        }
-    }
-</script>
+<script src="/js/auth.js"></script>
 </body>
 </html>

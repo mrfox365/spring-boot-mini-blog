@@ -9,7 +9,9 @@ import com.example.project.service.AuthService;
 import com.example.project.security.JwtService;
 import com.example.project.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,10 +69,10 @@ public class AuthController {
   }
 
   /**
-   * Authenticates a user and generates a JWT token upon success.
+   * Authenticates a user and sets a secure HttpOnly JWT cookie upon success.
    *
    * @param request the login credentials
-   * @return a response containing the JWT token and user info
+   * @return a response containing user info and a Set-Cookie header
    */
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -79,14 +81,43 @@ public class AuthController {
     if (user != null) {
       String token = jwtService.generateToken(user.getUsername());
 
-      Map<String, String> response = new HashMap<>();
-      response.put("token", token);
-      response.put("username", user.getUsername());
+      ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", token)
+          .httpOnly(true)
+          .secure(true)
+          .path("/")
+          .maxAge(24 * 60 * 60)
+          .sameSite("Strict")
+          .build();
 
-      return ResponseEntity.ok(response);
+      Map<String, String> responseBody = new HashMap<>();
+      responseBody.put("username", user.getUsername());
+
+      return ResponseEntity.ok()
+          .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+          .body(responseBody);
     } else {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid login or password");
     }
+  }
+
+  /**
+   * Logs out the user by clearing the secure JWT cookie.
+   *
+   * @return a success response with an expired cookie header
+   */
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout() {
+    ResponseCookie jwtCookie = ResponseCookie.from("jwtToken", "")
+        .httpOnly(true)
+        .secure(true)
+        .path("/")
+        .maxAge(0)
+        .sameSite("Strict")
+        .build();
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        .body("Logged out successfully");
   }
 
   /**
